@@ -1,0 +1,103 @@
+---
+title: "Regression Models Course Final Project"
+author: "Mike Holmquest"
+date: "4/22/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Executive Summary
+This project will be analyzing mileage data for Motor Trend, a magazine about the automobile industry. We will use a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+Question 1 - “Is an automatic or manual transmission better for MPG”
+Question 2 - "Quantify the MPG difference between automatic and manual transmissions"
+
+## Load data and programs
+
+Download the data and associated programs
+```{r Download_data and programs}
+library(datasets)
+data(mtcars)
+library(ggplot2)
+
+```
+
+## Exploratory Data Analysis
+
+The first goal is going to be to take a high level look at the data to see its organization and structure.
+```{r Data Exploration}
+## What do the variables mean
+?mtcars
+## Use str to see a compact summary of the data
+str(mtcars)
+sapply(mtcars, class)
+```
+
+From the information on the data set we see that the mtcars dataset is a data frame with 32 observations on 11 (numeric) variables.
+
+mpg	Miles/(US) gallon
+cyl	Number of cylinders
+disp	Displacement (cu.in.)
+hp	Gross horsepower
+drat	Rear axle ratio
+wt	Weight (1000 lbs)
+qsec	1/4 mile time
+vs	Engine (0 = V-shaped, 1 = straight)
+am	Transmission (0 = automatic, 1 = manual)
+gear	Number of forward gears
+carb	Number of carburetors
+
+From this information we know that all of the variables are numeric. We can also see that vs(Engine Type) and am(Transmission) are "0" , "1' factor variables. We can also see that cyl (Cylinders) is a 3 level variable with "4", "6", and "8". Let's convert these to factor variables for analysis purposes. 
+
+```{r convert to Factor}
+mtcars$vs = as.factor(mtcars$vs)
+mtcars$am = as.factor(mtcars$am)
+levels(mtcars$am) <- c("Automatic", "Manual")
+mtcars$cyl = as.factor(mtcars$cyl)
+```
+The most important variables for our analysis are mpg - miles per gallon, and am - transmission. We will also use some of the other variables lik cyl - cylinders, and wt - weight to see correlations and/or causations. 
+
+Lets take a quick look at the data to see what kind of trends it might show. 
+
+```{r mpg vs. transmission plot}
+plot1 <- ggplot(mtcars, aes(y = mpg, x = am, fill = am))
+plot1 = plot1 + geom_violin(colour = "black", size = 2)
+plot1 = plot1 + xlab("Type of Transmission") + ylab("MPG(miles per gallon)")
+plot1 = plot1 + scale_fill_discrete(name = "Transmission Type", labels=c("Automatic", "Manual"))
+plot1
+## What are some useful summary statistics
+aggregate(mpg ~ am, data=mtcars, mean)
+```
+Just out of curiosity lets take a look at how weight affects mpg.
+```{r mpg vs. weight fill = cylinder}
+plot2 <- ggplot(mtcars, aes(wt, mpg, colour = cyl)) + geom_point()
+plot2 = plot2 + labs(colour = "Cylinders")
+plot2 = plot2 + xlab("Weight in Tons") + ylab("MPG(miles per gallon")
+plot2
+
+## What are some useful summary statistics
+aggregate(mpg ~ wt, data=mtcars, mean)
+```
+
+
+```{r mpg vs. cyl}
+p <- ggplot(mtcars, aes(mpg, cyl, colour = am)) + geom_point()
+p + labs(colour = "Transmission Type")
+```
+
+
+
+## Regression Models
+
+We will do two regression models, as follows:
+Reg 1 - MPG ~ AM (MPG dependent on AM) Reg 2 - MPG ~ AM + WT + CYL + DISP + HP (MPG dependent on WT, CYL, DISP, and HP)
+```{r}
+reg1 <- lm(mpg ~ am, mtcars)
+reg2 <- lm(mpg ~ am + wt + cyl + disp + hp, mtcars)
+```
+
+
+
